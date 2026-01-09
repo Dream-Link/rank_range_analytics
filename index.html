@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e1e2e">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dream-Link Rank</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --text: #1e293b;
+            --secondary: #64748b;
+            --border: #e2e8f0;
+            --male-bg: #eff6ff;
+            --female-bg: #fdf2f8;
+            --tsp-text: #94a3b8;
+        }
+
+        [data-theme="dark"] {
+            --bg: #020617;
+            --card: #0f172a;
+            --text: #f1f5f9;
+            --border: #1e293b;
+            --male-bg: rgba(37, 99, 235, 0.1);
+            --female-bg: rgba(236, 72, 153, 0.1);
+            --tsp-text: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-size: 13px;
+            line-height: 1.4;
+            transition: background 0.3s;
+        }
+
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .brand {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #2563eb;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-sub {
+            display: flex;
+            flex-direction: column;
+            font-size: 8px;
+            font-weight: 800;
+            line-height: 1;
+            text-transform: uppercase;
+            color: #94a3b8;
+            animation: slowBlink 2.5s ease-in-out infinite;
+        }
+
+        @keyframes slowBlink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .header {
+            background: var(--card);
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+        }
+
+        .setup-section {
+            background: var(--card);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+
+        .input-group.narrow {
+            flex: 0 0 100px;
+        }
+
+        .input-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 5px;
+            display: block;
+            text-transform: uppercase;
+        }
+
+        .input-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            border-radius: 8px;
+            width: 100%;
+            color: var(--text);
+            font-size: 0.9rem;
+            outline: none;
+            font-weight: 600;
+            height: 40px;
+        }
+
+        .btn-action {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .btn-action:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .home-links {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            background: #D1CFCF;
+            color: #363434;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+
+
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001;
+            white-space: nowrap;
+        }
+
+        .report-section {
+            background: var(--card);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th {
+            font-size: 9px;
+            /* और छोटा फॉन्ट */
+            padding: 6px 2px;
+            /* कम पैडिंग */
+            color: var(--secondary);
+            font-weight: 800;
+            background: var(--bg);
+            border-bottom: 2px solid var(--border);
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 6px 2px;
+
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+
+            word-break: break-all;
+
+        }
+
+
+        .cat-pill {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .col-m {
+            background-color: var(--male-bg);
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .col-f {
+            background-color: var(--female-bg);
+            font-weight: 700;
+            color: #db2777;
+        }
+
+        .grand-total-row td {
+            background: var(--accent) !important;
+            color: white !important;
+            font-weight: 800;
+        }
+
+        #data-status-msg {
+            font-size: 12px;
+            font-weight: 700;
+            color: #ef4444;
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        /* Print Header Style as per Image */
+        #print-header {
+            display: none;
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #000;
+        }
+
+        #print-title {
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        #print-subtitle {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        #print-info {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 5px;
+            color: #444;
+        }
+
+        @media print {
+
+            .header,
+            .setup-section,
+            .home-links,
+            .nav-actions {
+                display: none !important;
+            }
+
+            #print-header {
+                display: block !important;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .report-section {
+                display: block !important;
+            }
+
+            table {
+                width: 100% !important;
+                border: 1px solid #000;
+            }
+
+            th,
+            td {
+                border: 1px solid #000 !important;
+                color: black !important;
+                padding: 8px 4px !important;
+            }
+
+            .col-m,
+            .col-f {
+                background: transparent !important;
+                color: black !important;
+            }
+
+            .grand-total-row td {
+                background: #eee !important;
+                color: black !important;
+            }
+        }
+
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+
+    <div id="loading-overlay"><i class="fas fa-circle-notch fa-spin fa-3x" style="color: white;"></i></div>
+
+    <div id="print-header">
+        <div id="print-title">EXAMINATION ANALYSIS</div>
+        <div id="print-subtitle">Analyzed by MP SALODIYA</div>
+        <div id="print-info"></div>
+    </div>
+
+    <header class="header">
+        <div class="brand-container">
+            <div class="brand">Dream-Link</div>
+            <div class="brand-sub"><span>MP</span><span>SALODIYA</span></div>
+        </div>
+        <div class="nav-actions">
+            <button class="icon-btn" onclick="toggleTheme()" id="theme-toggle"><i class="fas fa-moon"></i></button>
+            <button class="icon-btn" onclick="window.print()"><i class="fas fa-print"></i></button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="setup-section">
+            <div class="input-row">
+                <div class="input-group">
+                    <label class="input-label">Examination</label>
+                    <select id="exam-select" class="input-box" onchange="checkServerData()">
+                        <option value="vdo2025">VDO 2025</option>
+                        <option value="patwar2025">Patwar 2025</option>
+                        <option value="fourthclass">Fourth Class</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group narrow">
+                    <label class="input-label">Region</label>
+                    <select id="region-select" class="input-box" onchange="checkServerData()">
+                        <option value="ntsp">NTSP</option>
+                        <option value="tsp">TSP</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Rank Range</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="number" id="rank-start" class="input-box" placeholder="Start">
+                        <input type="number" id="rank-end" class="input-box" placeholder="End">
+                    </div>
+                </div>
+            </div>
+
+            <div id="data-status-msg">⚠️ डेटा उपलब्ध नहीं है।</div>
+
+            <button class="btn-action" id="gen-btn" onclick="fetchAndAnalyze()">
+                <i class="fas fa-bolt"></i> GENERATE ANALYTICS
+            </button>
+        </section>
+
+        <div class="home-links" id="home-intro">
+            <p style="margin-bottom: 15px; color: var(--secondary); font-weight: 600;">SELECT RANK RANGE</p>
+            <a href="https://t.me/Dreamlink_Analytics" target="_blank" rel="noopener noreferrer" class="link-btn">
+                <i class="fab fa-telegram"></i> JOIN TELEGRAM
+            </a>
+        </div>
+
+        <div class="report-section" id="main-table-container" style="display:none;">
+            <table id="data-table">
+                <thead id="table-head"></thead>
+                <tbody id="pivot-body"></tbody>
+                <tfoot id="pivot-footer"></tfoot>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLp6qx-EEIBg3a2zgq0dAY06LiXp02j3k",
+            authDomain: "rankrange-edc58.firebaseapp.com",
+            databaseURL: "https://rankrange-edc58-default-rtdb.firebaseio.com",
+            projectId: "rankrange-edc58",
+            storageBucket: "rankrange-edc58.firebasestorage.app",
+            messagingSenderId: "217654706062",
+            appId: "1:217654706062:web:3ca4e91a1606ed0460aedf"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function toggleTheme() {
+            const current = document.body.getAttribute('data-theme');
+            const target = current === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', target);
+            document.querySelector('#theme-toggle i').className = target === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        async function checkServerData() {
+            const exam = document.getElementById('exam-select').value;
+            const region = document.getElementById('region-select').value;
+            const msg = document.getElementById('data-status-msg');
+            const btn = document.getElementById('gen-btn');
+
+            document.getElementById('main-table-container').style.display = 'none';
+            document.getElementById('home-intro').style.display = 'block';
+
+            try {
+                const snap = await db.ref(`exams/${exam}/${region}`).limitToFirst(1).once('value');
+                if (!snap.exists()) {
+                    msg.style.display = 'block';
+                    btn.disabled = true;
+                } else {
+                    msg.style.display = 'none';
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                console.error("Firebase Error");
+            }
+        }
+
+        async function fetchAndAnalyze() {
+            const examEl = document.getElementById('exam-select');
+            const regionEl = document.getElementById('region-select');
+            const start = document.getElementById('rank-start').value;
+            const end = document.getElementById('rank-end').value;
+
+            const examText = examEl.options[examEl.selectedIndex].text;
+            const regionText = regionEl.options[regionEl.selectedIndex].text;
+
+            if (!start || !end || parseInt(end) < parseInt(start)) return alert("कृपया सही रैंक रेंज डालें!");
+
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            // Set Print Info
+            document.getElementById('print-info').innerText = `Exam: ${examText} | Area: ${regionText} | Range: ${start} to ${end}`;
+
+            const isTspRegion = (regionEl.value === 'tsp');
+
+            let headHTML = `<tr><th style="text-align: left; padding-left: 15px;">CATEGORY</th><th>MALE</th><th>FEMALE</th><th>OTHER</th>`;
+            if (!isTspRegion) headHTML += `<th>TSP</th>`;
+            headHTML += `<th>TOTAL</th></tr>`;
+            document.getElementById('table-head').innerHTML = headHTML;
+
+            try {
+                const snap = await db.ref(`exams/${examEl.value}/${regionEl.value}`).orderByKey().startAt(start.toString()).endAt(end.toString()).once('value');
+                const data = snap.val();
+                document.getElementById('home-intro').style.display = 'none';
+                document.getElementById('main-table-container').style.display = 'block';
+                processRecords(data ? Object.values(data) : [], isTspRegion);
+            } catch (e) {
+                alert("डेटा लोड करने में समस्या आई!");
+            }
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function processRecords(records, isTspRegion) {
+            const cats = ['GEN', 'OBC', 'EWS', 'MBC', 'SC', 'ST'];
+            const matrix = {};
+            cats.forEach(c => matrix[c] = {
+                m: 0,
+                f: 0,
+                o: 0,
+                tsp: 0,
+                t: 0,
+                subs: {}
+            });
+            let grand = {
+                m: 0,
+                f: 0,
+                o: 0,
+                tsp: 0,
+                t: 0
+            };
+
+            records.forEach(item => {
+                let cat = (item.Category || '').toUpperCase();
+                let key = cats.find(k => cat.includes(k) || (k === 'GEN' && cat === 'UR'));
+                if (key) {
+                    const g = (item.Gender || '').toUpperCase();
+                    if (g === 'MALE') {
+                        matrix[key].m++;
+                        grand.m++;
+                    } else if (g === 'FEMALE') {
+                        matrix[key].f++;
+                        grand.f++;
+                    } else {
+                        matrix[key].o++;
+                        grand.o++;
+                    }
+
+                    if (!isTspRegion && (item.TSP === 'YES' || item.TSP === 'TSP')) {
+                        matrix[key].tsp++;
+                        grand.tsp++;
+                    }
+                    matrix[key].t++;
+                    grand.t++;
+
+                    const s = item.SubCat || '-';
+                    if (s !== '-') matrix[key].subs[s] = (matrix[key].subs[s] || 0) + 1;
+                }
+            });
+            render(matrix, grand, isTspRegion);
+        }
+
+        function render(matrix, grand, isTspRegion) {
+            let html = '';
+            Object.entries(matrix).forEach(([name, d]) => {
+                html += `
+                    <tr>
+                        <td style="text-align:left; padding-left:15px;"><span class="cat-pill">${name}</span></td>
+                        <td class="col-m">${d.m}</td><td class="col-f">${d.f}</td><td>${d.o}</td>
+                        ${isTspRegion ? '' : `<td style="color:var(--tsp-text)">${d.tsp}</td>`}
+                        <td style="font-weight:800">${d.t}</td>
+                    </tr>
+                `;
+                const subs = Object.entries(d.subs);
+                if (subs.length > 0) {
+                    html += `<tr><td colspan="${isTspRegion ? 5 : 6}" style="background:var(--bg); border:none">
+                        <div style="padding:5px 15px; display:flex; flex-wrap:wrap; gap:5px;">
+                        ${subs.map(([n, c]) => `<span style="font-size:10px; background:var(--card); border:1px solid var(--border); padding:2px 8px; border-radius:5px">${n}: <b>${c}</b></span>`).join('')}
+                        </div></td></tr>`;
+                }
+            });
+            document.getElementById('pivot-body').innerHTML = html;
+
+            let footHTML = `<tr class="grand-total-row"><td>TOTAL</td><td>${grand.m}</td><td>${grand.f}</td><td>${grand.o}</td>`;
+            if (!isTspRegion) footHTML += `<td>${grand.tsp}</td>`;
+            footHTML += `<td>${grand.t}</td></tr>`;
+            document.getElementById('pivot-footer').innerHTML = footHTML;
+        }
+
+        checkServerData();
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
+    </script>
+</body>
+
+</html>
