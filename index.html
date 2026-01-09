@@ -374,6 +374,70 @@
             align-items: center;
             justify-content: center;
         }
+
+        .status-table-container {
+            margin-top: 10px;
+            padding: 0;
+            /* साइड की पैडिंग पूरी तरह हटा दी गई */
+            width: 100%;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card);
+            /* border-radius हटा दिया ताकि किनारे स्क्रीन से मिल जाएँ */
+            overflow: hidden;
+            font-size: 12px;
+        }
+
+        .status-table th {
+            background: var(--bg);
+            color: var(--secondary);
+            font-weight: 700;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .status-table td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            color: var(--tsp-text);
+        }
+
+        .status-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-table .exam-name {
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+            padding-left: 15px;
+        }
+
+        .check-icon {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .cross-icon {
+            color: #cbd5e1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -436,10 +500,25 @@
         </section>
 
         <div class="home-links" id="home-intro">
-            <p style="margin-bottom: 15px; color: var(--secondary); font-weight: 600;">SELECT RANK RANGE</p>
-            <a href="https://t.me/Dreamlink_Analytics" target="_blank" rel="noopener noreferrer" class="link-btn">
-                <i class="fab fa-telegram"></i> JOIN TELEGRAM
-            </a>
+            <div class="status-table-container">
+                <table class="status-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding-left: 15px;">EXAMINATION</th>
+                            <th>NTSP</th>
+                            <th>TSP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="status-table-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 25px;">
+                <a href="https://t.me/Dreamlink_Analytics" target="_blank" rel="noopener noreferrer" class="link-btn">
+                    <i class="fab fa-telegram"></i> JOIN TELEGRAM
+                </a>
+            </div>
         </div>
 
         <div class="report-section" id="main-table-container" style="display:none;">
@@ -452,6 +531,44 @@
     </main>
 
     <script>
+        const examStatusData = [{
+                id: 'vdo2025',
+                name: 'VDO 2025',
+                ntsp: true,
+                tsp: false
+            },
+            {
+                id: 'patwar2025',
+                name: 'Patwar 2025',
+                ntsp: true,
+                tsp: false
+            },
+            {
+                id: 'fourthclass',
+                name: 'Fourth Class',
+                ntsp: false,
+                tsp: false
+            }
+        ];
+
+        function loadStatusTable() {
+            const tbody = document.getElementById('status-table-body');
+            let html = '';
+
+            examStatusData.forEach(item => {
+                html += `
+            <tr>
+                <td class="exam-name">${item.name}</td>
+                <td>${item.ntsp ? '<i class="fas fa-check-circle check-icon"></i>' : '<i class="fas fa-times cross-icon"></i>'}</td>
+                <td>${item.tsp ? '<i class="fas fa-check-circle check-icon"></i>' : '<i class="fas fa-times cross-icon"></i>'}</td>
+            </tr>
+        `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // पेज लोड होते ही टेबल चलायें
+        window.addEventListener('DOMContentLoaded', loadStatusTable);
         const firebaseConfig = {
             apiKey: "AIzaSyDLp6qx-EEIBg3a2zgq0dAY06LiXp02j3k",
             authDomain: "rankrange-edc58.firebaseapp.com",
