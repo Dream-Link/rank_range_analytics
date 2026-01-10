@@ -7,10 +7,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dream-Link Rank</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;900&display=swap" rel="stylesheet">
+ 
     <style>
         :root {
             --bg: #f8fafc;
@@ -227,9 +226,9 @@
 
         th {
             font-size: 9px;
-            /* और छोटा फॉन्ट */
+
             padding: 6px 2px;
-            /* कम पैडिंग */
+
             color: var(--secondary);
             font-weight: 800;
             background: var(--bg);
@@ -271,10 +270,46 @@
             color: #db2777;
         }
 
-        .grand-total-row td {
-            background: var(--accent) !important;
+
+        .summary-wrapper {
+            margin-top: 30px;
+            background: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+
+        .summary-header-row td {
+            background: #2563eb !important;
             color: white !important;
-            font-weight: 800;
+            font-weight: 800 !important;
+            font-size: 13px !important;
+            padding: 10px 4px !important;
+            border: none !important;
+            text-transform: uppercase;
+        }
+
+
+        .global-sub-row td {
+            padding: 8px 4px !important;
+            font-size: 11px !important;
+            font-weight: 700;
+            color: var(--secondary);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .global-sub-row:last-child td {
+            border-bottom: none;
+        }
+
+        .global-sub-icon {
+            margin-right: 6px;
+            font-size: 10px;
+            color: var(--accent);
+            opacity: 0.7;
         }
 
         #data-status-msg {
@@ -290,7 +325,7 @@
             display: none;
         }
 
-        /* Print Header Style as per Image */
+
         #print-header {
             display: none;
             text-align: center;
@@ -378,7 +413,7 @@
         .status-table-container {
             margin-top: 10px;
             padding: 0;
-            /* साइड की पैडिंग पूरी तरह हटा दी गई */
+
             width: 100%;
             animation: fadeIn 0.8s ease;
         }
@@ -387,7 +422,7 @@
             width: 100%;
             border-collapse: collapse;
             background: var(--card);
-            /* border-radius हटा दिया ताकि किनारे स्क्रीन से मिल जाएँ */
+
             overflow: hidden;
             font-size: 12px;
         }
@@ -438,6 +473,99 @@
                 transform: translateY(0);
             }
         }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-card {
+            background: var(--card);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg);
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .modal-body {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .saved-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .saved-info {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .saved-title {
+            font-weight: 800;
+            font-size: 12px;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .saved-meta {
+            font-size: 10px;
+            color: var(--secondary);
+            margin-top: 2px;
+            font-weight: 600;
+        }
+
+        .delete-btn {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
     </style>
 </head>
 
@@ -457,6 +585,9 @@
             <div class="brand-sub"><span>MP</span><span>SALODIYA</span></div>
         </div>
         <div class="nav-actions">
+            <button class="icon-btn" onclick="toggleSavedModal()">
+                <i class="fas fa-folder-open"></i>
+            </button>
             <button class="icon-btn" onclick="toggleTheme()" id="theme-toggle"><i class="fas fa-moon"></i></button>
             <button class="icon-btn" onclick="window.print()"><i class="fas fa-print"></i></button>
         </div>
@@ -494,9 +625,15 @@
 
             <div id="data-status-msg">⚠️ डेटा उपलब्ध नहीं है।</div>
 
-            <button class="btn-action" id="gen-btn" onclick="fetchAndAnalyze()">
-                <i class="fas fa-bolt"></i> GENERATE ANALYTICS
-            </button>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn-action" id="gen-btn" onclick="fetchAndAnalyze()" style="flex: 1;">
+                    <i class="fas fa-bolt"></i> ANALYZE
+                </button>
+
+                <button class="btn-action" onclick="saveReportToLocal()" style="flex: 0 0 50px; background: #10b981; width: 50px; justify-content: center; padding: 0;">
+                    <i class="fas fa-save" style="font-size: 1.2rem;"></i>
+                </button>
+            </div>
         </section>
 
         <div class="home-links" id="home-intro">
@@ -528,8 +665,19 @@
                 <tfoot id="pivot-footer"></tfoot>
             </table>
         </div>
+        <div id="summary-wrapper" class="summary-wrapper" style="display:none;">
+        </div>
     </main>
-
+    <div id="saved-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Saved Reports</h3>
+                <button onclick="toggleSavedModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text);"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="saved-list-container" class="modal-body">
+            </div>
+        </div>
+    </div>
     <script>
         const examStatusData = [{
                 id: 'vdo2025',
@@ -569,17 +717,6 @@
 
         // पेज लोड होते ही टेबल चलायें
         window.addEventListener('DOMContentLoaded', loadStatusTable);
-        const firebaseConfig = {
-            apiKey: "AIzaSyDLp6qx-EEIBg3a2zgq0dAY06LiXp02j3k",
-            authDomain: "rankrange-edc58.firebaseapp.com",
-            databaseURL: "https://rankrange-edc58-default-rtdb.firebaseio.com",
-            projectId: "rankrange-edc58",
-            storageBucket: "rankrange-edc58.firebasestorage.app",
-            messagingSenderId: "217654706062",
-            appId: "1:217654706062:web:3ca4e91a1606ed0460aedf"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
 
         function toggleTheme() {
             const current = document.body.getAttribute('data-theme');
@@ -588,67 +725,110 @@
             document.querySelector('#theme-toggle i').className = target === 'light' ? 'fas fa-moon' : 'fas fa-sun';
         }
 
-        async function checkServerData() {
-            const exam = document.getElementById('exam-select').value;
-            const region = document.getElementById('region-select').value;
-            const msg = document.getElementById('data-status-msg');
-            const btn = document.getElementById('gen-btn');
+       function checkServerData() {
+    // UI रिसेट करें
+    document.getElementById('data-status-msg').style.display = 'none';
+    document.getElementById('gen-btn').disabled = false;
+    document.getElementById('main-table-container').style.display = 'none';
+    document.getElementById('home-intro').style.display = 'block';
+}
+        
 
-            document.getElementById('main-table-container').style.display = 'none';
-            document.getElementById('home-intro').style.display = 'block';
+     // ग्लोबल वेरिएबल: डेटा को सेव रखने के लिए
+let loadedExamCache = {};
 
-            try {
-                const snap = await db.ref(`exams/${exam}/${region}`).limitToFirst(1).once('value');
-                if (!snap.exists()) {
-                    msg.style.display = 'block';
-                    btn.disabled = true;
-                } else {
-                    msg.style.display = 'none';
-                    btn.disabled = false;
-                }
-            } catch (e) {
-                console.error("Firebase Error");
-            }
-        }
+function fetchAndAnalyze() {
+    const examEl = document.getElementById('exam-select');
+    const regionEl = document.getElementById('region-select');
+    const startInput = document.getElementById('rank-start').value;
+    const endInput = document.getElementById('rank-end').value;
 
-        async function fetchAndAnalyze() {
-            const examEl = document.getElementById('exam-select');
-            const regionEl = document.getElementById('region-select');
-            const start = document.getElementById('rank-start').value;
-            const end = document.getElementById('rank-end').value;
+    const examId = examEl.value; // e.g., vdo2025
+    const regionKey = regionEl.value; // e.g., ntsp
 
-            const examText = examEl.options[examEl.selectedIndex].text;
-            const regionText = regionEl.options[regionEl.selectedIndex].text;
+    // Validation
+    if (!startInput || !endInput) return alert("कृपया रैंक रेंज डालें!");
+    const start = parseInt(startInput);
+    const end = parseInt(endInput);
+    if (end < start) return alert("End Rank, Start Rank से बड़ी होनी चाहिए!");
 
-            if (!start || !end || parseInt(end) < parseInt(start)) return alert("कृपया सही रैंक रेंज डालें!");
+    document.getElementById('loading-overlay').style.display = 'flex';
+    document.getElementById('print-info').innerText = `Exam: ${examEl.options[examEl.selectedIndex].text} | Area: ${regionEl.options[regionEl.selectedIndex].text} | Range: ${start} to ${end}`;
 
-            document.getElementById('loading-overlay').style.display = 'flex';
+    const isTspRegion = (regionKey === 'tsp');
 
-            // Set Print Info
-            document.getElementById('print-info').innerText = `Exam: ${examText} | Area: ${regionText} | Range: ${start} to ${end}`;
+    // Header Setup
+    let headHTML = `<tr><th style="text-align: left; padding-left: 15px;">CATEGORY</th><th>MALE</th><th>FEMALE</th><th>OTHER</th>`;
+    if (!isTspRegion) headHTML += `<th>TSP</th>`;
+    headHTML += `<th>TOTAL</th></tr>`;
+    document.getElementById('table-head').innerHTML = headHTML;
 
-            const isTspRegion = (regionEl.value === 'tsp');
+    // --- NEW LOADING LOGIC (Script Injection) ---
+    
+    // 1. Check if data is already loaded in window
+    if (window[examId]) {
+        console.log("Data already loaded via Cache");
+        runAnalysis(window[examId], regionKey, start, end, isTspRegion);
+        return;
+    }
 
-            let headHTML = `<tr><th style="text-align: left; padding-left: 15px;">CATEGORY</th><th>MALE</th><th>FEMALE</th><th>OTHER</th>`;
-            if (!isTspRegion) headHTML += `<th>TSP</th>`;
-            headHTML += `<th>TOTAL</th></tr>`;
-            document.getElementById('table-head').innerHTML = headHTML;
-
-            try {
-                const snap = await db.ref(`exams/${examEl.value}/${regionEl.value}`).orderByKey().startAt(start.toString()).endAt(end.toString()).once('value');
-                const data = snap.val();
-                document.getElementById('home-intro').style.display = 'none';
-                document.getElementById('main-table-container').style.display = 'block';
-                processRecords(data ? Object.values(data) : [], isTspRegion);
-            } catch (e) {
-                alert("डेटा लोड करने में समस्या आई!");
-            }
+    // 2. If not loaded, inject script tag
+    console.log(`Loading Script: ${examId}.js`);
+    const script = document.createElement('script');
+    script.src = `${examId}.js`; // Loads vdo2025.js, etc.
+    
+    script.onload = function() {
+        // Script loaded successfully
+        if (window[examId]) {
+            runAnalysis(window[examId], regionKey, start, end, isTspRegion);
+        } else {
+            alert("Error: File load ho gayi par data nahi mila. Check spelling in JS file.");
             document.getElementById('loading-overlay').style.display = 'none';
         }
+    };
+
+    script.onerror = function() {
+        alert(`Error: ${examId}.js file nahi mili! Folder check karein.`);
+        document.getElementById('loading-overlay').style.display = 'none';
+    };
+
+    document.body.appendChild(script);
+}
+
+// Helper Function to Process Data
+function runAnalysis(examData, regionKey, start, end, isTspRegion) {
+    try {
+        const regionData = examData[regionKey] || {};
+        const filteredData = [];
+
+        Object.keys(regionData).forEach(rankKey => {
+            const rank = parseInt(rankKey);
+            if (rank >= start && rank <= end) {
+                filteredData.push({ ...regionData[rankKey], Rank: rank });
+            }
+        });
+
+        document.getElementById('home-intro').style.display = 'none';
+        document.getElementById('main-table-container').style.display = 'block';
+
+        if (filteredData.length === 0) {
+            alert("इस रैंक रेंज में कोई डेटा नहीं मिला!");
+        }
+
+        processRecords(filteredData, isTspRegion);
+
+    } catch (e) {
+        console.error(e);
+        alert("Error processing data: " + e.message);
+    }
+    document.getElementById('loading-overlay').style.display = 'none';
+}
 
         function processRecords(records, isTspRegion) {
             const cats = ['GEN', 'OBC', 'EWS', 'MBC', 'SC', 'ST', 'SAH'];
             const matrix = {};
+
+            // 1. Data Structure Setup
             cats.forEach(c => matrix[c] = {
                 m: 0,
                 f: 0,
@@ -657,6 +837,7 @@
                 t: 0,
                 subs: {}
             });
+
             let grand = {
                 m: 0,
                 f: 0,
@@ -664,12 +845,17 @@
                 tsp: 0,
                 t: 0
             };
+            let grandSubs = {}; // Global Subcategory Totals
 
             records.forEach(item => {
                 let cat = (item.Category || '').toUpperCase();
                 let key = cats.find(k => cat.includes(k) || (k === 'GEN' && cat === 'UR'));
+
                 if (key) {
                     const g = (item.Gender || '').toUpperCase();
+                    const isTSP = (item.TSP === 'YES' || item.TSP === 'TSP');
+
+                    // --- Main Category Counting ---
                     if (g === 'MALE') {
                         matrix[key].m++;
                         grand.m++;
@@ -681,47 +867,258 @@
                         grand.o++;
                     }
 
-                    if (!isTspRegion && (item.TSP === 'YES' || item.TSP === 'TSP')) {
+                    if (!isTspRegion && isTSP) {
                         matrix[key].tsp++;
                         grand.tsp++;
                     }
                     matrix[key].t++;
                     grand.t++;
 
+                    // --- Sub Category Counting ---
                     const s = item.SubCat || '-';
-                    if (s !== '-') matrix[key].subs[s] = (matrix[key].subs[s] || 0) + 1;
+                    if (s !== '-') {
+                        // A. Inside Category (Local)
+                        if (!matrix[key].subs[s]) matrix[key].subs[s] = {
+                            m: 0,
+                            f: 0,
+                            o: 0,
+                            tsp: 0,
+                            t: 0
+                        };
+
+                        if (g === 'MALE') matrix[key].subs[s].m++;
+                        else if (g === 'FEMALE') matrix[key].subs[s].f++;
+                        else matrix[key].subs[s].o++;
+
+                        if (!isTspRegion && isTSP) matrix[key].subs[s].tsp++;
+                        matrix[key].subs[s].t++;
+
+                        // B. Overall Totals (Global - New Feature)
+                        if (!grandSubs[s]) grandSubs[s] = {
+                            m: 0,
+                            f: 0,
+                            o: 0,
+                            tsp: 0,
+                            t: 0
+                        };
+
+                        if (g === 'MALE') grandSubs[s].m++;
+                        else if (g === 'FEMALE') grandSubs[s].f++;
+                        else grandSubs[s].o++;
+
+                        if (!isTspRegion && isTSP) grandSubs[s].tsp++;
+                        grandSubs[s].t++;
+                    }
                 }
             });
-            render(matrix, grand, isTspRegion);
+
+            // Render ko naya data (grandSubs) bhejein
+            render(matrix, grand, grandSubs, isTspRegion);
         }
 
-        function render(matrix, grand, isTspRegion) {
+        function render(matrix, grand, grandSubs, isTspRegion) {
+            // --- PART 1: MAIN TABLE (Category Data) ---
             let html = '';
+
             Object.entries(matrix).forEach(([name, d]) => {
                 html += `
                     <tr>
-                        <td style="text-align:left; padding-left:15px;"><span class="cat-pill">${name}</span></td>
-                        <td class="col-m">${d.m}</td><td class="col-f">${d.f}</td><td>${d.o}</td>
-                        ${isTspRegion ? '' : `<td style="color:var(--tsp-text)">${d.tsp}</td>`}
+                        <td style="text-align:left; padding-left:15px;">
+                            <span class="cat-pill">${name}</span>
+                        </td>
+                        <td class="col-m">${d.m}</td>
+                        <td class="col-f">${d.f}</td>
+                        <td>${d.o}</td>
+                        ${!isTspRegion ? `<td style="color:var(--tsp-text)">${d.tsp}</td>` : ''}
                         <td style="font-weight:800">${d.t}</td>
                     </tr>
                 `;
-                const subs = Object.entries(d.subs);
-                if (subs.length > 0) {
-                    html += `<tr><td colspan="${isTspRegion ? 5 : 6}" style="background:var(--bg); border:none">
-                        <div style="padding:5px 15px; display:flex; flex-wrap:wrap; gap:5px;">
-                        ${subs.map(([n, c]) => `<span style="font-size:10px; background:var(--card); border:1px solid var(--border); padding:2px 8px; border-radius:5px">${n}: <b>${c}</b></span>`).join('')}
-                        </div></td></tr>`;
+
+                // Subcategories inside rows
+                const subKeys = Object.keys(d.subs);
+                if (subKeys.length > 0) {
+                    subKeys.forEach(subName => {
+                        const subData = d.subs[subName];
+                        html += `
+                            <tr class="sub-row">
+                                <td class="sub-name-cell">
+                                   <i class="fas fa-level-up-alt fa-rotate-90 sub-arrow"></i> ${subName}
+                                </td>
+                                <td>${subData.m}</td>
+                                <td>${subData.f}</td>
+                                <td>${subData.o}</td>
+                                ${!isTspRegion ? `<td>${subData.tsp}</td>` : ''}
+                                <td style="font-weight:700; color:var(--text);">${subData.t}</td>
+                            </tr>
+                        `;
+                    });
                 }
             });
             document.getElementById('pivot-body').innerHTML = html;
 
-            let footHTML = `<tr class="grand-total-row"><td>TOTAL</td><td>${grand.m}</td><td>${grand.f}</td><td>${grand.o}</td>`;
-            if (!isTspRegion) footHTML += `<td>${grand.tsp}</td>`;
-            footHTML += `<td>${grand.t}</td></tr>`;
-            document.getElementById('pivot-footer').innerHTML = footHTML;
+            // Note: Humne Footer (tfoot) ko ab khaali chhod diya hai taaki wo hide ho jaye
+            document.getElementById('pivot-footer').innerHTML = '';
+
+
+            // --- PART 2: SEPARATE SUMMARY CARD (Professional Look) ---
+
+            let summaryHTML = `<table style="width:100%; border-collapse:collapse; text-align:center;">`;
+
+            // A. Grand Total Header (Blue Row)
+            summaryHTML += `
+                <tr class="summary-header-row">
+                    <td style="text-align:left; padding-left:20px !important;">TOTAL</td>
+                    <td>${grand.m}</td>
+                    <td>${grand.f}</td>
+                    <td>${grand.o}</td>
+                    ${!isTspRegion ? `<td>${grand.tsp}</td>` : ''}
+                    <td>${grand.t}</td>
+                </tr>
+            `;
+
+            // B. Global Subcategory Breakdown (Rows below Total)
+            if (grandSubs) {
+                Object.keys(grandSubs).sort().forEach(subName => {
+                    const d = grandSubs[subName];
+                    summaryHTML += `
+                        <tr class="global-sub-row">
+                            <td style="text-align:left; padding-left:25px !important;">
+                               <i class="fas fa-layer-group global-sub-icon"></i> ${subName}
+                            </td>
+                            <td style="color:#2563eb;">${d.m}</td>
+                            <td style="color:#db2777;">${d.f}</td>
+                            <td>${d.o}</td>
+                            ${!isTspRegion ? `<td style="color:var(--tsp-text);">${d.tsp}</td>` : ''}
+                            <td style="color:var(--text); font-weight:900;">${d.t}</td>
+                        </tr>
+                    `;
+                });
+            }
+            summaryHTML += `</table>`;
+
+            // Inject into the new wrapper and show it
+            const summaryWrapper = document.getElementById('summary-wrapper');
+            summaryWrapper.innerHTML = summaryHTML;
+            summaryWrapper.style.display = 'block';
+        }
+        // --- Local Storage & Saved Reports Logic ---
+
+        // 1. Save Current Configuration
+        function saveReportToLocal() {
+            const exam = document.getElementById('exam-select').value;
+            const region = document.getElementById('region-select').value;
+            const start = document.getElementById('rank-start').value;
+            const end = document.getElementById('rank-end').value;
+
+            // Validation
+            if (!start || !end) {
+                alert("Please enter a Rank Range first!");
+                return;
+            }
+
+            const report = {
+                id: Date.now(), // Unique ID
+                exam: exam,
+                region: region,
+                start: start,
+                end: end,
+                date: new Date().toLocaleDateString()
+            };
+
+            // Get existing data
+            let saved = JSON.parse(localStorage.getItem('dl_saved_reports') || '[]');
+
+            // Check for duplicates (optional, based on exact match)
+            const exists = saved.some(r => r.exam === exam && r.region === region && r.start === start && r.end === end);
+            if (exists) {
+                alert("This report is already saved!");
+                return;
+            }
+
+            // Save new
+            saved.unshift(report); // Add to top
+            localStorage.setItem('dl_saved_reports', JSON.stringify(saved));
+
+            // Visual Feedback
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => btn.innerHTML = originalHTML, 1500);
         }
 
+        // 2. Toggle Modal Visibility
+        function toggleSavedModal() {
+            const modal = document.getElementById('saved-modal');
+            if (modal.style.display === 'none') {
+                renderSavedList();
+                modal.style.display = 'flex';
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        // 3. Render List inside Modal
+        function renderSavedList() {
+            const container = document.getElementById('saved-list-container');
+            const saved = JSON.parse(localStorage.getItem('dl_saved_reports') || '[]');
+
+            if (saved.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--secondary); font-size:12px;">No saved reports found.</div>';
+                return;
+            }
+
+            let html = '';
+            saved.forEach((item, index) => {
+                // Get readable names
+                const examName = document.querySelector(`#exam-select option[value="${item.exam}"]`)?.text || item.exam;
+                const regionName = item.region.toUpperCase();
+
+                html += `
+                    <div class="saved-item">
+                        <div class="saved-info" onclick="loadAndRunReport(${index})">
+                            <div class="saved-title">${examName} (${regionName})</div>
+                            <div class="saved-meta">Rank: ${item.start} - ${item.end} • ${item.date}</div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteReport(${index})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // 4. Load Report & Run
+        function loadAndRunReport(index) {
+            const saved = JSON.parse(localStorage.getItem('dl_saved_reports') || '[]');
+            const item = saved[index];
+
+            if (item) {
+                // Fill inputs
+                document.getElementById('exam-select').value = item.exam;
+                document.getElementById('region-select').value = item.region;
+                document.getElementById('rank-start').value = item.start;
+                document.getElementById('rank-end').value = item.end;
+
+                // Close modal
+                toggleSavedModal();
+
+                // Trigger Check & Generate
+                checkServerData(); // Update UI based on exam
+                fetchAndAnalyze(); // Run main function
+            }
+        }
+
+        // 5. Delete Report
+        function deleteReport(index) {
+            if (!confirm("Delete this saved record?")) return;
+
+            let saved = JSON.parse(localStorage.getItem('dl_saved_reports') || '[]');
+            saved.splice(index, 1); // Remove item
+            localStorage.setItem('dl_saved_reports', JSON.stringify(saved));
+
+            renderSavedList(); // Refresh UI
+        }
         checkServerData();
     </script>
     <script>
