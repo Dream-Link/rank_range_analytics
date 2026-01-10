@@ -1,6 +1,5 @@
 window.vdo2025 = {
     "ntsp": {
-JSON GEN
 "1": { "Gender": "MALE", "Category": "EWS", "SubCat": "", "TSP": "" },
 "2": { "Gender": "MALE", "Category": "EWS", "SubCat": "", "TSP": "" },
 "3": { "Gender": "MALE", "Category": "OBC", "SubCat": "", "TSP": "" },
