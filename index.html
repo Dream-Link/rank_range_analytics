@@ -704,18 +704,27 @@
             let html = '';
 
             examStatusData.forEach(item => {
-                html += `
-            <tr>
-                <td class="exam-name">${item.name}</td>
-                <td>${item.ntsp ? '<i class="fas fa-check-circle check-icon"></i>' : '<i class="fas fa-times cross-icon"></i>'}</td>
-                <td>${item.tsp ? '<i class="fas fa-check-circle check-icon"></i>' : '<i class="fas fa-times cross-icon"></i>'}</td>
-            </tr>
-        `;
+                if (item.id === 'fourthclass') {
+                    html += `
+                    <tr>
+                        <td colspan="3" style="padding: 12px; text-align: center; font-weight: 700;">
+                            <a href="https://google.com" target="_blank" style="text-decoration: none; color: var(--accent); display: block; width: 100%;">
+                                <i class="fas fa-external-link-alt"></i> Fourth Class भर्ती के लिए यहाँ क्लिक करें
+                            </a>
+                        </td>
+                    </tr>`;
+                } else {
+                    html += `
+                    <tr>
+                        <td class="exam-name">${item.name}</td>
+                        <td>${item.ntsp ? '<i class="fas fa-check-circle check-icon"></i>' : '<i class="fas fa-times cross-icon"></i>'}</td>
+                        <td>${item.tsp ? '<i class="fas fa-check-circle check-icon"></i>' : '<i class="fas fa-times cross-icon"></i>'}</td>
+                    </tr>`;
+                }
             });
             tbody.innerHTML = html;
         }
 
-        // पेज लोड होते ही टेबल चलायें
         window.addEventListener('DOMContentLoaded', loadStatusTable);
 
         function toggleTheme() {
@@ -726,27 +735,45 @@
         }
 
        function checkServerData() {
-    // UI रिसेट करें
-    document.getElementById('data-status-msg').style.display = 'none';
-    document.getElementById('gen-btn').disabled = false;
-    document.getElementById('main-table-container').style.display = 'none';
-    document.getElementById('home-intro').style.display = 'block';
-}
+            document.getElementById('data-status-msg').style.display = 'none';
+            document.getElementById('gen-btn').disabled = false;
+            document.getElementById('main-table-container').style.display = 'none';
+            document.getElementById('home-intro').style.display = 'block';
+
+            const examSelect = document.getElementById('exam-select');
+            const regionGroup = document.getElementById('region-select').closest('.input-group');
+            const rankGroup = document.getElementById('rank-start').closest('.input-group');
+            const analyzeBtn = document.getElementById('gen-btn');
+
+            if (examSelect.value === 'fourthclass') {
+                regionGroup.style.display = 'none';
+                rankGroup.style.display = 'none';
+                analyzeBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> OPEN LINK';
+            } else {
+                regionGroup.style.display = 'block';
+                rankGroup.style.display = 'block';
+                analyzeBtn.innerHTML = '<i class="fas fa-bolt"></i> ANALYZE';
+            }
+        }
         
 
-     // ग्लोबल वेरिएबल: डेटा को सेव रखने के लिए
 let loadedExamCache = {};
 
 function fetchAndAnalyze() {
     const examEl = document.getElementById('exam-select');
     const regionEl = document.getElementById('region-select');
+    
+    if (examEl.value === 'fourthclass') {
+        window.open('https://google.com', '_blank');
+        return;
+    }
+
     const startInput = document.getElementById('rank-start').value;
     const endInput = document.getElementById('rank-end').value;
 
-    const examId = examEl.value; // e.g., vdo2025
-    const regionKey = regionEl.value; // e.g., ntsp
+    const examId = examEl.value; 
+    const regionKey = regionEl.value;
 
-    // Validation
     if (!startInput || !endInput) return alert("कृपया रैंक रेंज डालें!");
     const start = parseInt(startInput);
     const end = parseInt(endInput);
@@ -757,28 +784,22 @@ function fetchAndAnalyze() {
 
     const isTspRegion = (regionKey === 'tsp');
 
-    // Header Setup
     let headHTML = `<tr><th style="text-align: left; padding-left: 15px;">CATEGORY</th><th>MALE</th><th>FEMALE</th><th>OTHER</th>`;
     if (!isTspRegion) headHTML += `<th>TSP</th>`;
     headHTML += `<th>TOTAL</th></tr>`;
     document.getElementById('table-head').innerHTML = headHTML;
 
-    // --- NEW LOADING LOGIC (Script Injection) ---
-    
-    // 1. Check if data is already loaded in window
     if (window[examId]) {
         console.log("Data already loaded via Cache");
         runAnalysis(window[examId], regionKey, start, end, isTspRegion);
         return;
     }
 
-    // 2. If not loaded, inject script tag
     console.log(`Loading Script: ${examId}.js`);
     const script = document.createElement('script');
-    script.src = `${examId}.js`; // Loads vdo2025.js, etc.
+    script.src = `${examId}.js`;
     
     script.onload = function() {
-        // Script loaded successfully
         if (window[examId]) {
             runAnalysis(window[examId], regionKey, start, end, isTspRegion);
         } else {
@@ -795,7 +816,6 @@ function fetchAndAnalyze() {
     document.body.appendChild(script);
 }
 
-// Helper Function to Process Data
 function runAnalysis(examData, regionKey, start, end, isTspRegion) {
     try {
         const regionData = examData[regionKey] || {};
@@ -828,7 +848,6 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
             const cats = ['GEN', 'OBC', 'EWS', 'MBC', 'SC', 'ST', 'SAH'];
             const matrix = {};
 
-            // 1. Data Structure Setup
             cats.forEach(c => matrix[c] = {
                 m: 0,
                 f: 0,
@@ -845,7 +864,7 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
                 tsp: 0,
                 t: 0
             };
-            let grandSubs = {}; // Global Subcategory Totals
+            let grandSubs = {};
 
             records.forEach(item => {
                 let cat = (item.Category || '').toUpperCase();
@@ -855,7 +874,6 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
                     const g = (item.Gender || '').toUpperCase();
                     const isTSP = (item.TSP === 'YES' || item.TSP === 'TSP');
 
-                    // --- Main Category Counting ---
                     if (g === 'MALE') {
                         matrix[key].m++;
                         grand.m++;
@@ -874,10 +892,8 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
                     matrix[key].t++;
                     grand.t++;
 
-                    // --- Sub Category Counting ---
                     const s = item.SubCat || '-';
                     if (s !== '-') {
-                        // A. Inside Category (Local)
                         if (!matrix[key].subs[s]) matrix[key].subs[s] = {
                             m: 0,
                             f: 0,
@@ -893,7 +909,6 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
                         if (!isTspRegion && isTSP) matrix[key].subs[s].tsp++;
                         matrix[key].subs[s].t++;
 
-                        // B. Overall Totals (Global - New Feature)
                         if (!grandSubs[s]) grandSubs[s] = {
                             m: 0,
                             f: 0,
@@ -912,12 +927,10 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
                 }
             });
 
-            // Render ko naya data (grandSubs) bhejein
             render(matrix, grand, grandSubs, isTspRegion);
         }
 
         function render(matrix, grand, grandSubs, isTspRegion) {
-            // --- PART 1: MAIN TABLE (Category Data) ---
             let html = '';
 
             Object.entries(matrix).forEach(([name, d]) => {
@@ -934,7 +947,6 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
                     </tr>
                 `;
 
-                // Subcategories inside rows
                 const subKeys = Object.keys(d.subs);
                 if (subKeys.length > 0) {
                     subKeys.forEach(subName => {
@@ -956,15 +968,11 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
             });
             document.getElementById('pivot-body').innerHTML = html;
 
-            // Note: Humne Footer (tfoot) ko ab khaali chhod diya hai taaki wo hide ho jaye
             document.getElementById('pivot-footer').innerHTML = '';
 
 
-            // --- PART 2: SEPARATE SUMMARY CARD (Professional Look) ---
-
             let summaryHTML = `<table style="width:100%; border-collapse:collapse; text-align:center;">`;
 
-            // A. Grand Total Header (Blue Row)
             summaryHTML += `
                 <tr class="summary-header-row">
                     <td style="text-align:left; padding-left:20px !important;">TOTAL</td>
@@ -976,7 +984,6 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
                 </tr>
             `;
 
-            // B. Global Subcategory Breakdown (Rows below Total)
             if (grandSubs) {
                 Object.keys(grandSubs).sort().forEach(subName => {
                     const d = grandSubs[subName];
@@ -996,28 +1003,24 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
             }
             summaryHTML += `</table>`;
 
-            // Inject into the new wrapper and show it
             const summaryWrapper = document.getElementById('summary-wrapper');
             summaryWrapper.innerHTML = summaryHTML;
             summaryWrapper.style.display = 'block';
         }
-        // --- Local Storage & Saved Reports Logic ---
 
-        // 1. Save Current Configuration
         function saveReportToLocal() {
             const exam = document.getElementById('exam-select').value;
             const region = document.getElementById('region-select').value;
             const start = document.getElementById('rank-start').value;
             const end = document.getElementById('rank-end').value;
 
-            // Validation
             if (!start || !end) {
                 alert("Please enter a Rank Range first!");
                 return;
             }
 
             const report = {
-                id: Date.now(), // Unique ID
+                id: Date.now(),
                 exam: exam,
                 region: region,
                 start: start,
@@ -1025,28 +1028,23 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
                 date: new Date().toLocaleDateString()
             };
 
-            // Get existing data
             let saved = JSON.parse(localStorage.getItem('dl_saved_reports') || '[]');
 
-            // Check for duplicates (optional, based on exact match)
             const exists = saved.some(r => r.exam === exam && r.region === region && r.start === start && r.end === end);
             if (exists) {
                 alert("This report is already saved!");
                 return;
             }
 
-            // Save new
-            saved.unshift(report); // Add to top
+            saved.unshift(report);
             localStorage.setItem('dl_saved_reports', JSON.stringify(saved));
 
-            // Visual Feedback
             const btn = event.currentTarget;
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check"></i>';
             setTimeout(() => btn.innerHTML = originalHTML, 1500);
         }
 
-        // 2. Toggle Modal Visibility
         function toggleSavedModal() {
             const modal = document.getElementById('saved-modal');
             if (modal.style.display === 'none') {
@@ -1057,7 +1055,6 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
             }
         }
 
-        // 3. Render List inside Modal
         function renderSavedList() {
             const container = document.getElementById('saved-list-container');
             const saved = JSON.parse(localStorage.getItem('dl_saved_reports') || '[]');
@@ -1069,7 +1066,6 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
 
             let html = '';
             saved.forEach((item, index) => {
-                // Get readable names
                 const examName = document.querySelector(`#exam-select option[value="${item.exam}"]`)?.text || item.exam;
                 const regionName = item.region.toUpperCase();
 
@@ -1088,36 +1084,31 @@ function runAnalysis(examData, regionKey, start, end, isTspRegion) {
             container.innerHTML = html;
         }
 
-        // 4. Load Report & Run
         function loadAndRunReport(index) {
             const saved = JSON.parse(localStorage.getItem('dl_saved_reports') || '[]');
             const item = saved[index];
 
             if (item) {
-                // Fill inputs
                 document.getElementById('exam-select').value = item.exam;
                 document.getElementById('region-select').value = item.region;
                 document.getElementById('rank-start').value = item.start;
                 document.getElementById('rank-end').value = item.end;
 
-                // Close modal
                 toggleSavedModal();
 
-                // Trigger Check & Generate
-                checkServerData(); // Update UI based on exam
-                fetchAndAnalyze(); // Run main function
+                checkServerData();
+                fetchAndAnalyze();
             }
         }
 
-        // 5. Delete Report
         function deleteReport(index) {
             if (!confirm("Delete this saved record?")) return;
 
             let saved = JSON.parse(localStorage.getItem('dl_saved_reports') || '[]');
-            saved.splice(index, 1); // Remove item
+            saved.splice(index, 1);
             localStorage.setItem('dl_saved_reports', JSON.stringify(saved));
 
-            renderSavedList(); // Refresh UI
+            renderSavedList();
         }
         checkServerData();
     </script>
